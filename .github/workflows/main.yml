@@ -1,0 +1,49 @@
+name: Docker CI Learning - KUCL 
+on:
+  push:
+jobs:
+  docker_1:
+    runs-on: ubuntu-latest 
+      #labels: kucl22 
+         
+    steps:
+      -
+        name: Set up QEMU test
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mywebsite:k8sself
+  deploy:
+    needs: docker_1
+    name: k8s deployment 
+    runs-on: 
+      labels: k8s_master
+    steps:
+      - name: decode kubeconfig
+        run: echo "${{ secrets.BASEKUBECONFIG }}" | base64  --decode > /tmp/myconfig
+     
+     # - name: decode kubeconfig
+     #   run: echo ${{ secrets.MYKUBECONFIG }} > /tmp/config
+        
+     # - name: create deployment1
+     #   run:  base64  --decode /tmp/config > /tmp/myconfig
+     # - name: clone
+     #   run:  git clone https://github.com/HarshalST/dockerfile_for_jenkins
+        
+      - name: replace image
+        run:  sed -i 's,docker.io/httpd,${{ secrets.DOCKERHUB_USERNAME }}/mywebsite:k8sself,' **/deployment.yaml
+
+      - name: create deployment
+        run: kubectl apply -f **/deployment.yaml --kubeconfig=/tmp/myconfig
