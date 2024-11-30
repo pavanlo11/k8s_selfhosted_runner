@@ -3,8 +3,8 @@ on:
   push:
 jobs:
   docker_1:
-    runs-on: ubuntu-latest 
-      #labels: kucl22 
+    runs-on: 
+      labels: k8s_master 
          
     steps:
       -
@@ -31,8 +31,8 @@ jobs:
     runs-on: 
       labels: k8s_master
     steps:
-      - name: decode kubeconfig
-        run: echo "${{ secrets.BASEKUBECONFIG }}" | base64  --decode > /tmp/myconfig
+     # - name: decode kubeconfig
+      #  run: echo "${{ secrets.BASEKUBECONFIG }}" | base64  --decode > /tmp/myconfig
      
      # - name: decode kubeconfig
      #   run: echo ${{ secrets.MYKUBECONFIG }} > /tmp/config
