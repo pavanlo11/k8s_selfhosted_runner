@@ -39,8 +39,8 @@ jobs:
         
      # - name: create deployment1
      #   run:  base64  --decode /tmp/config > /tmp/myconfig
-     # - name: clone
-     #   run:  git clone https://github.com/HarshalST/dockerfile_for_jenkins
+      - name: clone
+        run:  git clone https://github.com/pavanlo11/k8s_selfhosted_runner
         
       - name: replace image
         run:  sed -i 's,docker.io/httpd,${{ secrets.DOCKERHUB_USERNAME }}/mywebsite:k8sself,' **/deployment.yaml
