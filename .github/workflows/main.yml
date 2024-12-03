@@ -24,15 +24,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME}}/kucl22:actions
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mywebsite:k8sselfhosted
   deploy:
     needs: docker_1
     name: k8s deployment 
     runs-on: 
       labels: k8s_master
     steps:
-      - name: create deployment
-      # mkdir ${HOME}/.kube
-      #  echo ${{MYKUBECONFIG}} | base64  --decode > ${HOME}./kube/config
+      - name: decode kubeconfig
+        run: echo "${{ secrets.BASEKUBECONFIG }}" | base64  --decode > /tmp/myconfig
+     
+     # - name: decode kubeconfig
+     #   run: echo ${{ secrets.MYKUBECONFIG }} > /tmp/config
         
-        run: kubectl create deployment githubaction --image docker.io/httpd
+     # - name: create deployment1
+     #   run:  base64  --decode /tmp/config > /tmp/myconfig
+      - name: clone
+        run:  https://github.com/pavanlo11/k8s_selfhosted_runner
+        
+      - name: replace image
+        run:  sed -i 's,docker.io/httpd,${{ secrets.DOCKERHUB_USERNAME }}/mywebsite:k8sselfhosted,' **/deployment.yaml
+
+      - name: create deployment
+        run: kubectl apply -f **/deployment.yaml --kubeconfig=/tmp/myconfig  
+      
